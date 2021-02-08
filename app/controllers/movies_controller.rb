@@ -7,7 +7,32 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    if session[:arbitrary] && params[:home] == nil
+      var = session[:arbitrary]
+    else 
+      var = params
+    end
+    ratings = var["ratings"]
+    if var["movietitle"]
+       @movies = Movie.with_ratings(ratings).order("title")
+       @title_color = "hilite"
+       @release_date_color = nil
+    elsif var["release_date"] 
+      @movies = Movie.with_ratings(ratings).order("release_date")
+      @release_date_color = "hilite"
+      @title_color = nil
+    else
+      @movies = Movie.with_ratings(ratings)
+      @release_date_color = nil
+      @title_color = nil
+    end
+    @all_ratings = Movie.all_ratings
+      if ratings
+        @ratings_to_show = ratings.keys
+      else 
+        @ratings_to_show = []
+      end
+     session[:arbitrary] = params
   end
 
   def new
